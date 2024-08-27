@@ -12,7 +12,7 @@ if __name__ == "__main__":
     print('Methods:')
     for m in method:
         count = school_collection.count_documents({"method": m})
-        print(f'    method {m}: {count}')
+        print(f'\tmethod {m}: {count}')
     status_check = school_collection.count_documents(
         {"method": "GET", "path": "/status"}
     )
