@@ -12,4 +12,4 @@ def list_all(mongo_collection):
     :param mongo_collection: The pymongo collection object
     :return: List of documents in the collection
     """
-    return list(mongo_collection.find())
+    return mongo_collection.find()
