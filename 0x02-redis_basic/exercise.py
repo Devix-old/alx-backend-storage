@@ -21,9 +21,9 @@ def call_history(method: callable) -> callable:
     @wraps(method)
     def wrapper(self: any, arg: Union[str, bytes, int, float]) -> str:
         """wrapper"""
-        self._redis.rpush(f"{method.__qualname__}:inputs", arg)
-        self._redis.rpush(f"{method.__qualname__}:outputs", method(self, arg))
-        return method(self, arg)
+        self._redis.rpush(f"{method.__qualname__}:inputs", str(arg))
+        self._redis.rpush(f"{method.__qualname__}:outputs", method(self, str(arg)))
+        return method(self, str(arg))
     return wrapper
 
 
