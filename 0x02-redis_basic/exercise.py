@@ -5,14 +5,12 @@ from functools import wraps
 """Redis-based caching module with call counting."""
 
 
-def count_calls(method: callable):
+def count_calls(method: callable) -> callable:
     """Decorator to count calls to a method."""
     @wraps(method)
-    def wrapper(self, *args, **kwds):
-        r = self._redis
-        key = method.__qualname__
-        count = int(r.get(key) or 0) + 1
-        r.set(key, count)
+    def wrapper(self: any, *args, **kwds) -> str:
+        """wrapper"""
+        self._redis.incr(method.__qualname__)
         return method(self, *args, **kwds)
     return wrapper
 
