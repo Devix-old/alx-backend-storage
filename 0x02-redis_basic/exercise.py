@@ -6,7 +6,7 @@ from typing import Union, Optional, Callable
 from functools import wraps
 
 
-def replay(func):
+def replay(func: Callable):
     """replay function"""
     r = redis.Redis()
     func_name = func.__qualname__
