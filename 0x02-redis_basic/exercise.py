@@ -7,16 +7,26 @@ from functools import wraps
 
 
 def replay(func: Callable) -> None:
-   """Replay function to display the history of calls."""
-   r = redis.Redis()
-   calls = r.get(func.__qualname__).decode('utf-8')
-   inputs = [input.decode('utf-8') for input in
-             r.lrange(f'{func.__qualname__}:inputs', 0, -1)]
-   outputs = [output.decode('utf-8') for output in
-              r.lrange(f'{func.__qualname__}:outputs', 0, -1)]
-   print(f'{func.__qualname__} was called {calls} times:')
-   for input, output in zip(inputs, outputs):
-       print(f'{func.__qualname__}(*{input}) -> {output}')
+    """Replay function to display the history of calls."""
+    r = redis.Redis()
+
+    # Retrieve the count of calls
+    calls = r.get(func.__qualname__).decode('utf-8')
+
+    # Retrieve inputs and outputs from Redis
+    inputs = [input.decode(
+        'utf-8') for input in r.lrange(
+        f'{func.__qualname__}:inputs', 0, -1)]
+    outputs = [output.decode(
+        'utf-8') for output in r.lrange(
+        f'{func.__qualname__}:outputs', 0, -1)]
+
+    # Print the call count
+    print(f'{func.__qualname__} was called {calls} times:')
+
+    # Print each call's input and output
+    for input, output in zip(inputs, outputs):
+        print(f'{func.__qualname__}(*{input}) -> {output}')
 
 
 def count_calls(method: callable) -> callable:
