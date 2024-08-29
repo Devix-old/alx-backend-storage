@@ -8,7 +8,7 @@ from functools import wraps
 from typing import Callable
 
 
-def track_get_page(fn: Callable) -> Callable:
+def get_page(fn: Callable) -> Callable:
     """Decorator to cache HTTP responses and track request counts."""
     
     @wraps(fn)
