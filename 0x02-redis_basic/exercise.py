@@ -19,11 +19,11 @@ def count_calls(method: callable) -> callable:
 def call_history(method: callable) -> callable:
     """Decorator to store inputs and ouputs of a method"""
     @wraps(method)
-    def wrapper(self: any, arg: Union[str, bytes, int, float]) -> str:
+    def wrapper(self: any, *args) -> str:
         """wrapper"""
-        self._redis.rpush(f"{method.__qualname__}:inputs", str(arg))
-        self._redis.rpush(f"{method.__qualname__}:outputs", method(self, str(arg)))
-        return method(self, str(arg))
+        self._redis.rpush(f"{method.__qualname__}:inputs", str(args))
+        self._redis.rpush(f"{method.__qualname__}:outputs", method(self, *args))
+        return method(self, *args)
     return wrapper
 
 
