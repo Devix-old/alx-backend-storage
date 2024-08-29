@@ -6,7 +6,6 @@ from typing import Union, Optional
 from functools import wraps
 
 
-
 def count_calls(method: callable) -> callable:
     """Decorator to count calls to a method."""
     @wraps(method)
@@ -17,6 +16,17 @@ def count_calls(method: callable) -> callable:
     return wrapper
 
 
+def call_history(method: callable) -> callable:
+    """Decorator to store inputs and ouputs of a method"""
+    @wraps(method)
+    def wrapper(self: any, arg: Union[str, bytes, int, float]) -> str:
+        """wrapper"""
+        self._redis.rpush(f"{method.__qualname__}:inputs", arg)
+        self._redis.rpush(f"{method.__qualname__}:outputs", method(self, arg))
+        return method(self, arg)
+    return wrapper
+
+
 class Cache:
     """Cache class using Redis."""
     def __init__(self) -> None:
@@ -24,6 +34,7 @@ class Cache:
         self._redis = redis.Redis()
         self._redis.flushdb()
 
+    @call_history
     @count_calls
     def store(self, data: Union[str, bytes, int, float]) -> str:
         """Store data in Redis and return its ID."""
