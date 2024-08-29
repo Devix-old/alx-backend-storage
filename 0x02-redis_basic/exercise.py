@@ -1,8 +1,10 @@
+#!/usr/bin/env python3
+"""Redis-based caching module with call counting."""
 import redis
 import uuid
 from typing import Union, Optional
 from functools import wraps
-"""Redis-based caching module with call counting."""
+
 
 
 def count_calls(method: callable) -> callable:
