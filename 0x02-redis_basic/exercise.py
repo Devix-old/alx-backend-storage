@@ -6,21 +6,17 @@ from typing import Union, Optional, Callable
 from functools import wraps
 
 
-def replay(func: Callable):
-    """replay function"""
-    r = redis.Redis()
-    func_name = func.__qualname__
-    count = r.get(func_name)
-    print(f"Cache.store was called {int(count)} times:")
-    outputs = r.lrange("{}:outputs".format(func.__qualname__), 0, -1)
-    result = []
-    for output in outputs:
-        input = str(r.get(output))
-        output = str(output)
-        string = f"{func_name}(*('{input}',)) -> {output}"
-        result.append(string)
-    for value in result:
-        print(value)
+def replay(func: Callable) -> None:
+   """Replay function to display the history of calls."""
+   r = redis.Redis()
+   calls = r.get(func.__qualname__).decode('utf-8')
+   inputs = [input.decode('utf-8') for input in
+             r.lrange(f'{func.__qualname__}:inputs', 0, -1)]
+   outputs = [output.decode('utf-8') for output in
+              r.lrange(f'{func.__qualname__}:outputs', 0, -1)]
+   print(f'{func.__qualname__} was called {calls} times:')
+   for input, output in zip(inputs, outputs):
+       print(f'{func.__qualname__}(*{input}) -> {output}')
 
 
 def count_calls(method: callable) -> callable:
