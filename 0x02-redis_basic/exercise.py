@@ -2,7 +2,7 @@
 """Redis-based caching module with call counting."""
 import redis
 import uuid
-from typing import Union, Optional
+from typing import Union, Optional, Callable
 from functools import wraps
 
 
@@ -16,7 +16,7 @@ def count_calls(method: callable) -> callable:
     return wrapper
 
 
-def call_history(method: callable) -> callable:
+def call_history(method: Callable) -> Callable:
     """Decorator to store inputs and ouputs of a method"""
     @wraps(method)
     def wrapper(self: any, *args) -> str:
