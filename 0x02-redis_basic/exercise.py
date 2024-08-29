@@ -1,47 +1,53 @@
-#!/usr/bin/env python3
 import redis
 import uuid
 from typing import Union, Optional
-"""Redis module"""
+from functools import wraps
+"""Redis-based caching module with call counting."""
+
+
+def count_calls(method: callable):
+    """Decorator to count calls to a method."""
+    @wraps(method)
+    def wrapper(self, *args, **kwds):
+        r = self._redis
+        key = method.__qualname__
+        count = int(r.get(key) or 0) + 1
+        r.set(key, count)
+        return method(self, *args, **kwds)
+    return wrapper
 
 
 class Cache:
-    """Cache class"""
+    """Cache class using Redis."""
     def __init__(self) -> None:
+        """Initialize Redis connection and clear the DB."""
         self._redis = redis.Redis()
         self._redis.flushdb()
 
+    @count_calls
     def store(self, data: Union[str, bytes, int, float]) -> str:
+        """Store data in Redis and return its ID."""
         id = uuid.uuid4()
         self._redis.set(str(id), data)
         return str(id)
-    
 
     def get(self, key: str, fn: Optional[callable] = None) -> any:
+        """Retrieve data from Redis, optionally converting it."""
         r = self._redis
         data = r.get(key)
-        if (fn is str):
+        if fn is str:
             return self.get_str(data)
-        if (fn is int):
-            return(int(data))
-        if (callable(fn)):
-            return data.decode('utf-8')
+        if fn is int:
+            return self.get_int(data)
+        if callable(fn):
+            return fn(data)
         else:
             return data
+
     def get_str(self, data: bytes) -> str:
-        return 	data.decode('utf-8')
+        """Convert bytes to string."""
+        return data.decode('utf-8')
+
     def get_int(self, data: bytes) -> int:
+        """Convert bytes to integer."""
         return int(data)
-        
-            
-cache = Cache()
-
-TEST_CASES = {
-    b"foo": None,
-    123: int,
-    "bar": lambda d: d.decode("utf-8")
-}
-
-for value, fn in TEST_CASES.items():
-    key = cache.store(value)
-    assert cache.get(key, fn=fn) == value
